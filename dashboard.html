@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parental Control Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .status-bar {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .status-item {
+            text-align: center;
+        }
+
+        .status-item .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .status-item .value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .nav-tabs button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tabs button:hover {
+            background: #efefef;
+        }
+
+        .nav-tabs button.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ee5a52;
+        }
+
+        .btn-success {
+            background: #51cf66;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #40c057;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background: #f5f5f5;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .day-input {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .day-input label {
+            margin-bottom: 8px;
+        }
+
+        .day-input input {
+            padding: 8px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons button {
+            padding: 8px 12px;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+
+        .time-display {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state p {
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs button {
+                font-size: 0.9em;
+                padding: 12px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .status-bar {
+                justify-content: center;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ Parental Control Dashboard</h1>
+            <p>Manage screen time limits and exceptions</p>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="label">Current Date</div>
+                <div class="value" id="currentDate">-</div>
+            </div>
+            <div class="status-item">
+                <div class="label">Apps Monitored</div>
+                <div class="value" id="appsMonitored">-</div>
+            </div>
+            <div class="status-item">
+                <div class="label">Apps Today</div>
+                <div class="value" id="appsToday">-</div>
+            </div>
+            <div class="status-item">
+                <div class="label">Exceptions Today</div>
+                <div class="value" id="exceptionsToday">-</div>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" data-tab="limits">⏱️ Time Limits</button>
+            <button class="tab-btn" data-tab="exceptions">✨ Exceptions</button>
+            <button class="tab-btn" data-tab="usage">📊 Usage</button>
+            <button class="tab-btn" data-tab="config">⚙️ Configuration</button>
+        </div>
+
+        <div class="content">
+            <!-- LIMITS TAB -->
+            <div id="limits" class="tab-content active">
+                <div id="alertLimits" class="alert"></div>
+
+                <div class="section">
+                    <h2>Create New App Limit</h2>
+                    <form id="limitForm">
+                        <div class="form-group">
+                            <label>Application Name (e.g., chrome.exe)</label>
+                            <input type="text" id="appNameInput" placeholder="chrome.exe" required>
+                        </div>
+
+                        <div class="days-grid" id="daysGrid"></div>
+
+                        <button type="submit" class="btn-primary" style="margin-top: 20px;">Add Application</button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h2>Existing Applications</h2>
+                    <div id="limitsLoading" class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                    <div id="limitsTable" class="table-responsive"></div>
+                </div>
+            </div>
+
+            <!-- EXCEPTIONS TAB -->
+            <div id="exceptions" class="tab-content">
+                <div id="alertExceptions" class="alert"></div>
+
+                <div class="section">
+                    <h2>Create Exception</h2>
+                    <form id="exceptionForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="exceptionDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Application Name</label>
+                                <input type="text" id="exceptionApp" placeholder="chrome.exe" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Time Adjustment Type</label>
+                                <select id="exceptionAdjustmentType" required>
+                                    <option value="add">Add Time</option>
+                                    <option value="remove">Remove Time</option>
+                                    <option value="set">Set Exact Limit</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Time Value</label>
+                                <div style="display: flex; gap: 5px; max-width: 200px;">
+                                    <div style="flex: 1;">
+                                        <input type="number" id="exceptionHours" value="0" min="0" placeholder="H" style="width: 100%; text-align: center;">
+                                        <small style="display: block; text-align: center; font-size: 0.75em; color: #999;">hours</small>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <input type="number" id="exceptionMinutes" value="0" min="0" max="59" placeholder="M" style="width: 100%; text-align: center;">
+                                        <small style="display: block; text-align: center; font-size: 0.75em; color: #999;">minutes</small>
+                                    </div>
+                                </div>
+                                <div class="time-display">
+                                    <small><strong>Examples:</strong><br>
+                                    • Add 0h 30m = Add 30 minutes to today's limit<br>
+                                    • Remove 0h 15m = Subtract 15 minutes from today's limit<br>
+                                    • Set 2h 0m = Set exact limit to 2 hours for today</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Reason (optional)</label>
+                                <input type="text" id="exceptionReason" placeholder="Homework, Special day, etc.">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary">Create Exception</button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h2>Today's Exceptions</h2>
+                    <div id="exceptionsLoading" class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                    <div id="exceptionsTable" class="table-responsive"></div>
+                </div>
+            </div>
+
+            <!-- USAGE TAB -->
+            <div id="usage" class="tab-content">
+                <div id="alertUsage" class="alert"></div>
+
+                <div class="section">
+                    <h2>Usage Statistics</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Select Date</label>
+                            <input type="date" id="usageDate" required>
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button type="button" class="btn-secondary" onclick="loadUsageData();">Load Data</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Usage Details</h2>
+                    <div id="usageLoading" class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                    <div id="usageTable" class="table-responsive"></div>
+                </div>
+            </div>
+
+            <!-- CONFIG TAB -->
+            <div id="config" class="tab-content">
+                <div id="alertConfig" class="alert"></div>
+
+                <div class="section">
+                    <h2>Configuration Management</h2>
+                    <div class="form-row">
+                        <button type="button" class="btn-success" onclick="downloadConfig();">📥 Download Configuration</button>
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('configFile').click();">📤 Upload Configuration</button>
+                        <input type="file" id="configFile" style="display: none;" accept=".json" onchange="uploadConfig();">
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Raw Configuration</h2>
+                    <div id="configLoading" class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                    <textarea id="configData" style="width: 100%; height: 400px; font-family: monospace; margin-top: 10px;"></textarea>
+                    <button type="button" class="btn-primary" onclick="refreshConfig();" style="margin-top: 10px;">🔄 Refresh</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 500px; width: 90%;">
+            <h2 style="margin-bottom: 20px;">Edit Application Limits</h2>
+            <p style="color: #666; margin-bottom: 20px;"><strong id="editAppName"></strong></p>
+            
+            <div id="editDaysGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;"></div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn-secondary" onclick="closeEditModal();">Cancel</button>
+                <button type="button" class="btn-primary" onclick="saveEditLimit();">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5000/api';  // Use secondary API for proxying
+        const PRIMARY_API_URL = 'http://127.0.0.1:5005/api';  // Direct access to primary for status
+        const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        
+        // Status caching to reduce API calls
+        const STATUS_CACHE = {
+            data: null,
+            lastFetch: 0,
+            cacheTTL: 10000  // Cache for 10 seconds
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupTabs();
+            setupDateInputs();
+            loadStatus();
+            setupForms();
+            loadLimits();
+            loadTodayExceptions();
+            loadConfig();
+        });
+
+        // Setup tab navigation
+        function setupTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    showTab(tabName);
+                });
+            });
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        // Setup date inputs
+        function setupDateInputs() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('currentDate').textContent = today;
+            document.getElementById('exceptionDate').value = today;
+            document.getElementById('usageDate').value = today;
+
+            // Create day inputs for limits
+            const daysGrid = document.getElementById('daysGrid');
+            DAYS.forEach(day => {
+                const div = document.createElement('div');
+                div.className = 'day-input';
+                div.innerHTML = `
+                    <label>${day}</label>
+                    <div style="display: flex; gap: 5px;">
+                        <div style="flex: 1;">
+                            <input type="number" class="dayHours" data-day="${day}" value="1" min="0" placeholder="H" style="width: 100%; text-align: center;">
+                            <small style="display: block; text-align: center; font-size: 0.75em; color: #999;">hours</small>
+                        </div>
+                        <div style="flex: 1;">
+                            <input type="number" class="dayMinutes" data-day="${day}" value="0" min="0" max="59" placeholder="M" style="width: 100%; text-align: center;">
+                            <small style="display: block; text-align: center; font-size: 0.75em; color: #999;">minutes</small>
+                        </div>
+                    </div>
+                `;
+                daysGrid.appendChild(div);
+            });
+        }
+
+        // Setup forms
+        function setupForms() {
+            document.getElementById('limitForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await createLimit();
+            });
+
+            document.getElementById('exceptionForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await createException();
+            });
+        }
+
+        // Show alert
+        function showAlert(elementId, message, type) {
+            const alert = document.getElementById(elementId);
+            alert.textContent = message;
+            alert.className = `alert show alert-${type}`;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        // Load status (with caching to reduce API calls)
+        async function loadStatus() {
+            const now = Date.now();
+            
+            // Use cache if still valid
+            if (STATUS_CACHE.data && (now - STATUS_CACHE.lastFetch) < STATUS_CACHE.cacheTTL) {
+                updateStatusUI(STATUS_CACHE.data);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${PRIMARY_API_URL}/status`);  // Direct to primary
+                const data = await response.json();
+                STATUS_CACHE.data = data;
+                STATUS_CACHE.lastFetch = now;
+                updateStatusUI(data);
+            } catch (error) {
+                console.error('Error loading status:', error);
+            }
+        }
+        
+        function updateStatusUI(data) {
+            document.getElementById('currentDate').textContent = data.data.current_date;
+            document.getElementById('appsMonitored').textContent = data.data.apps_monitored;
+            document.getElementById('appsToday').textContent = data.data.total_apps_today;
+            document.getElementById('exceptionsToday').textContent = data.data.exceptions_today;
+        }
+
+        // LIMITS MANAGEMENT
+        async function createLimit() {
+            const appName = document.getElementById('appNameInput').value;
+            const limits = {};
+            
+            DAYS.forEach(day => {
+                const hours = parseInt(document.querySelector(`.dayHours[data-day="${day}"]`).value) || 0;
+                const minutes = parseInt(document.querySelector(`.dayMinutes[data-day="${day}"]`).value) || 0;
+                limits[day] = (hours * 3600) + (minutes * 60);
+            });
+
+            try {
+                const response = await fetch(`${API_URL}/limits`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ app_name: appName, limits: limits })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('alertLimits', `✅ ${appName} added successfully!`, 'success');
+                    document.getElementById('limitForm').reset();
+                    DAYS.forEach(day => {
+                        document.querySelector(`.dayHours[data-day="${day}"]`).value = 1;
+                        document.querySelector(`.dayMinutes[data-day="${day}"]`).value = 0;
+                    });
+                    loadLimits();
+                    loadStatus();
+                } else {
+                    showAlert('alertLimits', `❌ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showAlert('alertLimits', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadLimits() {
+            document.getElementById('limitsLoading').classList.add('show');
+            try {
+                const response = await fetch(`${API_URL}/limits`);
+                const data = await response.json();
+                const limits = data.data;
+
+                let html = '';
+                if (Object.keys(limits).length === 0) {
+                    html = '<div class="empty-state"><p>No applications configured yet.</p></div>';
+                } else {
+                    html = '<table><thead><tr><th>Application</th><th>Monday-Friday</th><th>Saturday</th><th>Sunday</th><th>Actions</th></tr></thead><tbody>';
+                    for (const [app, times] of Object.entries(limits)) {
+                        const weekdayTime = times.Monday ? formatSeconds(times.Monday) : '-';
+                        const satTime = times.Saturday ? formatSeconds(times.Saturday) : '-';
+                        const sunTime = times.Sunday ? formatSeconds(times.Sunday) : '-';
+                        html += `
+                            <tr>
+                                <td>${app}</td>
+                                <td>${weekdayTime}</td>
+                                <td>${satTime}</td>
+                                <td>${sunTime}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-success" onclick="quickMakeException('${app}');">⚡ Exception</button>
+                                        <button class="btn-secondary" onclick="editLimit('${app}');">Edit</button>
+                                        <button class="btn-danger" onclick="deleteLimit('${app}');">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                    html += '</tbody></table>';
+                }
+                document.getElementById('limitsTable').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading limits:', error);
+                document.getElementById('limitsTable').innerHTML = '<p style="color: red;">Error loading limits</p>';
+            } finally {
+                document.getElementById('limitsLoading').classList.remove('show');
+            }
+        }
+
+        async function deleteLimit(appName) {
+            if (!confirm(`Are you sure you want to delete ${appName}?`)) return;
+
+            try {
+                const response = await fetch(`${API_URL}/limits/${appName}`, { method: 'DELETE' });
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('alertLimits', `✅ ${appName} deleted!`, 'success');
+                    loadLimits();
+                    loadStatus();
+                } else {
+                    showAlert('alertLimits', `❌ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showAlert('alertLimits', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function editLimit(appName) {
+            openEditModal(appName);
+        }
+
+        async function openEditModal(appName) {
+            try {
+                const response = await fetch(`${API_URL}/limits/${appName}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showAlert('alertLimits', `❌ Error: ${data.message}`, 'error');
+                    return;
+                }
+
+                const limits = data.data;
+                document.getElementById('editAppName').textContent = appName;
+                document.getElementById('editModal').dataset.appName = appName;
+
+                const editDaysGrid = document.getElementById('editDaysGrid');
+                editDaysGrid.innerHTML = '';
+
+                DAYS.forEach(day => {
+                    const div = document.createElement('div');
+                    div.className = 'day-input';
+                    const totalSeconds = limits[day] || 3600;
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    div.innerHTML = `
+                        <label>${day}</label>
+                        <div style="display: flex; gap: 5px;">
+                            <div style="flex: 1;">
+                                <input type="number" class="editDayHours" data-day="${day}" value="${hours}" min="0" placeholder="H" style="width: 100%; text-align: center;">
+                                <small style="display: block; text-align: center; font-size: 0.75em; color: #999;">hours</small>
+                            </div>
+                            <div style="flex: 1;">
+                                <input type="number" class="editDayMinutes" data-day="${day}" value="${minutes}" min="0" max="59" placeholder="M" style="width: 100%; text-align: center;">
+                                <small style="display: block; text-align: center; font-size: 0.75em; color: #999;">minutes</small>
+                            </div>
+                        </div>
+                    `;
+                    editDaysGrid.appendChild(div);
+                });
+
+                document.getElementById('editModal').style.display = 'flex';
+            } catch (error) {
+                showAlert('alertLimits', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function saveEditLimit() {
+            const appName = document.getElementById('editModal').dataset.appName;
+            const limits = {};
+            
+            DAYS.forEach(day => {
+                const hours = parseInt(document.querySelector(`.editDayHours[data-day="${day}"]`).value) || 0;
+                const minutes = parseInt(document.querySelector(`.editDayMinutes[data-day="${day}"]`).value) || 0;
+                limits[day] = (hours * 3600) + (minutes * 60);
+            });
+
+            try {
+                const response = await fetch(`${API_URL}/limits/${appName}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ limits: limits })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('alertLimits', `✅ ${appName} updated successfully!`, 'success');
+                    closeEditModal();
+                    loadLimits();
+                    loadStatus();
+                } else {
+                    showAlert('alertLimits', `❌ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showAlert('alertLimits', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+
+        // EXCEPTIONS MANAGEMENT
+        async function createException() {
+            const date = document.getElementById('exceptionDate').value;
+            const app = document.getElementById('exceptionApp').value;
+            const adjustmentType = document.getElementById('exceptionAdjustmentType').value;
+            const hours = parseInt(document.getElementById('exceptionHours').value) || 0;
+            const minutes = parseInt(document.getElementById('exceptionMinutes').value) || 0;
+            const timeValue = (hours * 3600) + (minutes * 60);
+            const reason = document.getElementById('exceptionReason').value || null;
+
+            // Convert adjustment type and value to the format expected by API
+            let exceptionTime;
+            if (adjustmentType === 'add') {
+                exceptionTime = timeValue;
+            } else if (adjustmentType === 'remove') {
+                exceptionTime = -timeValue;
+            } else if (adjustmentType === 'set') {
+                exceptionTime = timeValue;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/exceptions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date, app_name: app, exception_time: exceptionTime, adjustment_type: adjustmentType, reason })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('alertExceptions', `✅ Exception created for ${app}!`, 'success');
+                    document.getElementById('exceptionForm').reset();
+                    document.getElementById('exceptionDate').value = new Date().toISOString().split('T')[0];
+                    document.getElementById('exceptionAdjustmentType').value = 'add';
+                    document.getElementById('exceptionHours').value = '0';
+                    document.getElementById('exceptionMinutes').value = '0';
+                    loadTodayExceptions();
+                    loadStatus();
+                } else {
+                    showAlert('alertExceptions', `❌ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showAlert('alertExceptions', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function quickMakeException(appName) {
+            // Open exception form and pre-fill the app name
+            showTab('exceptions');
+            document.getElementById('exceptionApp').value = appName;
+            document.getElementById('exceptionTime').focus();
+        }
+
+        async function loadTodayExceptions() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('exceptionsLoading').classList.add('show');
+            try {
+                const response = await fetch(`${API_URL}/exceptions/${today}`);
+                const data = await response.json();
+                const exceptions = data.data;
+
+                let html = '';
+                if (Object.keys(exceptions).length === 0) {
+                    html = '<div class="empty-state"><p>No exceptions for today.</p></div>';
+                } else {
+                    html = '<table><thead><tr><th>Application</th><th>Time Adjustment</th><th>Reason</th><th>Actions</th></tr></thead><tbody>';
+                    
+                    // Process each app and its transactions
+                    for (const [app, excList] of Object.entries(exceptions)) {
+                        if (!Array.isArray(excList)) {
+                            console.warn(`Invalid exception format for ${app}:`, excList);
+                            continue;
+                        }
+                        
+                        let totalTime = 0;
+                        
+                        // Display each transaction
+                        for (let i = 0; i < excList.length; i++) {
+                            const transaction = excList[i];
+                            if (!Array.isArray(transaction) || transaction.length < 2) {
+                                console.warn(`Invalid transaction format for ${app}[${i}]:`, transaction);
+                                continue;
+                            }
+                            
+                            const timeValue = transaction[0];
+                            const reason = transaction[1] || '-';
+                            const timeText = formatSeconds(timeValue);
+                            const sign = timeValue >= 0 ? '+' : '';
+                            totalTime += timeValue;
+                            
+                            html += `
+                                <tr>
+                                    <td>${app}</td>
+                                    <td>${sign}${timeText}</td>
+                                    <td>${reason}</td>
+                                    <td>
+                                        <button class="btn-danger" onclick="deleteExceptionTransaction('${today}', '${app}', ${i});">Delete</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                        
+                        // Display total for this app
+                        const totalText = formatSeconds(totalTime);
+                        const totalSign = totalTime >= 0 ? '+' : '';
+                        html += `
+                            <tr style="background: #f5f5f5; font-weight: bold;">
+                                <td>${app} (Total)</td>
+                                <td>${totalSign}${totalText}</td>
+                                <td colspan="2" style="text-align: center;">
+                                    <button class="btn-danger" onclick="deleteException('${today}', '${app}');">Delete All</button>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                    
+                    html += '</tbody></table>';
+                }
+                document.getElementById('exceptionsTable').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading exceptions:', error);
+                document.getElementById('exceptionsTable').innerHTML = '<p style="color: red;">Error loading exceptions</p>';
+            } finally {
+                document.getElementById('exceptionsLoading').classList.remove('show');
+            }
+        }
+
+        async function deleteException(date, app) {
+            if (!confirm(`Delete all exceptions for ${app}?`)) return;
+
+            try {
+                const response = await fetch(`${API_URL}/exceptions/${date}/${app}`, { method: 'DELETE' });
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('alertExceptions', `✅ All exceptions deleted!`, 'success');
+                    loadTodayExceptions();
+                    loadStatus();
+                } else {
+                    showAlert('alertExceptions', `❌ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showAlert('alertExceptions', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteExceptionTransaction(date, app, index) {
+            if (!confirm(`Delete this exception?`)) return;
+
+            try {
+                const response = await fetch(`${API_URL}/exceptions/${date}/${app}/${index}`, { method: 'DELETE' });
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('alertExceptions', `✅ Exception deleted!`, 'success');
+                    loadTodayExceptions();
+                    loadStatus();
+                } else {
+                    showAlert('alertExceptions', `❌ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showAlert('alertExceptions', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // USAGE TRACKING
+        async function loadUsageData() {
+            const date = document.getElementById('usageDate').value;
+            document.getElementById('usageLoading').classList.add('show');
+            try {
+                const response = await fetch(`${API_URL}/usage/${date}`);
+                const data = await response.json();
+                const usage = data.data;
+
+                let html = '';
+                if (Object.keys(usage).length === 0) {
+                    html = '<div class="empty-state"><p>No usage data for this date.</p></div>';
+                } else {
+                    html = '<table><thead><tr><th>Application</th><th>Usage Time</th><th>Usage Percentage*</th></tr></thead><tbody>';
+                    for (const [app, seconds] of Object.entries(usage)) {
+                        const timeText = formatSeconds(seconds);
+                        html += `
+                            <tr>
+                                <td>${app}</td>
+                                <td>${timeText}</td>
+                                <td>${seconds > 0 ? Math.round((seconds / 86400) * 100) : 0}%</td>
+                            </tr>
+                        `;
+                    }
+                    html += '</tbody></table>';
+                    html += '<p style="font-size: 0.9em; color: #999; margin-top: 10px;">* Percentage of total day (24 hours)</p>';
+                }
+                document.getElementById('usageTable').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading usage:', error);
+                document.getElementById('usageTable').innerHTML = '<p style="color: red;">Error loading usage</p>';
+            } finally {
+                document.getElementById('usageLoading').classList.remove('show');
+            }
+        }
+
+        // CONFIGURATION
+        async function loadConfig() {
+            document.getElementById('configLoading').classList.add('show');
+            try {
+                const response = await fetch(`${API_URL}/config`);
+                const data = await response.json();
+                document.getElementById('configData').value = JSON.stringify(data.data, null, 2);
+            } catch (error) {
+                console.error('Error loading config:', error);
+                document.getElementById('configData').value = 'Error loading configuration';
+            } finally {
+                document.getElementById('configLoading').classList.remove('show');
+            }
+        }
+
+        function refreshConfig() {
+            loadConfig();
+            showAlert('alertConfig', '🔄 Configuration refreshed!', 'info');
+        }
+
+        function downloadConfig() {
+            const config = document.getElementById('configData').value;
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(config));
+            element.setAttribute('download', `config_${new Date().toISOString().split('T')[0]}.json`);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            showAlert('alertConfig', '📥 Configuration downloaded!', 'success');
+        }
+
+        function uploadConfig() {
+            const file = document.getElementById('configFile').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const config = JSON.parse(e.target.result);
+                    const response = await fetch(`${API_URL}/config`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(config)
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        showAlert('alertConfig', '✅ Configuration uploaded successfully!', 'success');
+                        loadConfig();
+                        loadLimits();
+                        loadTodayExceptions();
+                        loadStatus();
+                    } else {
+                        showAlert('alertConfig', `❌ Error: ${data.message}`, 'error');
+                    }
+                } catch (error) {
+                    showAlert('alertConfig', `❌ Error: ${error.message}`, 'error');
+                }
+            };
+            reader.readAsText(file);
+            document.getElementById('configFile').value = '';
+        }
+
+        // Utility functions
+        function formatSeconds(seconds) {
+            if (seconds === 0) return '0s';
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+
+            let result = '';
+            if (hours > 0) result += `${hours}h `;
+            if (minutes > 0) result += `${minutes}m `;
+            if (secs > 0 || result === '') result += `${secs}s`;
+            return result;
+        }
+
+        // Auto-load initial data on limits tab
+        setTimeout(() => loadTodayExceptions(), 500);
+    </script>
+</body>
+</html>
