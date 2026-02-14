@@ -1,0 +1,14 @@
+# Python environment
+env/
+venv/
+__pycache__/
+*.pyc
+
+# Environment variables (CRITICAL: Do not share your API keys/secrets!)
+.env
+
+# Database files
+*.db
+
+# OS generated files
+.DS_Store
