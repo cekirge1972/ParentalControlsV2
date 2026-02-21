@@ -66,7 +66,7 @@ def save_usage(usage):
 def shutdown():
     import os
     print("Time exceeded for overall usage. Shutting down the computer.")
-    os.system('shutdown /s /t 0 /F') # I wrote cls because I don't want the computer to shutdown when I am testing :)
+    os.system('shutdown /s /t 0 /F') 
 
 def trigger_tag_event(tag_id): 
     # We run this in a function to be threaded
