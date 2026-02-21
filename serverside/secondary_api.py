@@ -21,7 +21,7 @@ app = Flask(__name__)
 log.setLevel(logging.ERROR) """
 
 # Configuration
-PRIMARY_API_URL = 'http://127.0.0.1:5005/api'
+PRIMARY_API_URL = 'http://127.0.0.1:5000/api'
 QUEUE_DB = 'request_queue.db'
 SYNC_INTERVAL = 10  # seconds
 REQUEST_TIMEOUT = 3.0  # seconds (increased to allow slightly slower responses)
@@ -603,4 +603,4 @@ if __name__ == "__main__":
     print("  Clear Queue: POST /api/server/queue/clear")
     print("\nStarting server...\n")
     
-    app.run(debug=False, host="0.0.0.0", port=5000)
+    app.run(debug=False, host="0.0.0.0", port=5035)
