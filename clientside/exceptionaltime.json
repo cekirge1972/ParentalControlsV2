@@ -18,5 +18,39 @@
         null
       ]
     ]
+  },
+  "2026-02-21": {
+    "chrome.exe": [
+      [
+        600,
+        null
+      ],
+      [
+        600,
+        null
+      ]
+    ],
+    "OVERALL": [
+      [
+        7200,
+        "aferim"
+      ],
+      [
+        300,
+        "5 Do\u011fru yapt\u0131\u011f\u0131n\u0131z i\u00e7in - COALIDE"
+      ],
+      [
+        120,
+        "7 Do\u011fru yapt\u0131\u011f\u0131n\u0131z i\u00e7in - COALIDE"
+      ],
+      [
+        180,
+        "10 Do\u011fru yapt\u0131\u011f\u0131n\u0131z i\u00e7in - COALIDE"
+      ],
+      [
+        900,
+        null
+      ]
+    ]
   }
 }
