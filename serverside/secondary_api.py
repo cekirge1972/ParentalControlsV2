@@ -356,6 +356,12 @@ def create_exception():
 def delete_exception(date, app_name):
     return proxy_request('DELETE', f'/exceptions/{date}/{app_name}', return_queued=True)
 
+
+@app.route("/api/exceptions/<date>/<app_name>/<int:index>", methods=["DELETE"])
+def delete_exception_transaction_proxy(date, app_name, index):
+    """Proxy delete for a specific exception transaction (queues when primary offline)."""
+    return proxy_request('DELETE', f'/exceptions/{date}/{app_name}/{index}', return_queued=True)
+
 # USAGE ENDPOINTS
 @app.route("/api/usage", methods=["GET"])
 def get_usage():
