@@ -21,7 +21,7 @@ CHECK_INTERVAL = 5  # seconds
 load_dotenv()
 HASS_URL = os.getenv("HASS_URL","http://homeassistant.local:8123")
 TOKEN = os.getenv("HASS_TOKEN")
-SAFETY_SLEEP = 3
+SAFETY_SLEEP = 120
 
 
 USED_EXCEPTIONS=[]
