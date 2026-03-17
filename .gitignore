@@ -1,9 +1,18 @@
-# Ignore SQLite database files
+
+env/
+venv/
+__pycache__/
+*.pyc
+
+.env
+
 *.db
-*.db-journal
-*.db-wal
-*.db-shm
 
-# Existing entries
+.DS_Store
 
-# Other ignore rules
+# PyInstaller
+build/
+dist/
+*.spec
+*.manifest
+*.exe
