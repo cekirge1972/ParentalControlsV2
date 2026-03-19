@@ -4,6 +4,10 @@ venv/
 __pycache__/
 *.pyc
 
+exceptionaltime.json
+timelimit.json
+timeusage.json
+used_exceptions.json
 .env
 .json
 *.db
