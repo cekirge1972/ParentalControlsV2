@@ -546,8 +546,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://127.0.0.1:5035/api';  // Primary API (update to secondary API URL if using secondary server)
-        const PRIMARY_API_URL = 'http://127.0.0.1:5000/api';  // Direct access to primary for status
+        const API_URL = 'http://127.0.0.1:5035/api';  // Secondary API
         const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         
         // Status caching to reduce API calls
@@ -648,7 +647,7 @@
             }
             
             try {
-                const response = await fetch(`${PRIMARY_API_URL}/status`);  // Direct to primary
+                const response = await fetch(`${API_URL}/status`);
                 const data = await response.json();
                 STATUS_CACHE.data = data;
                 STATUS_CACHE.lastFetch = now;
@@ -659,10 +658,18 @@
         }
         
         function updateStatusUI(data) {
-            document.getElementById('currentDate').textContent = data.data.current_date;
-            document.getElementById('appsMonitored').textContent = data.data.apps_monitored;
-            document.getElementById('appsToday').textContent = data.data.total_apps_today;
-            document.getElementById('exceptionsToday').textContent = data.data.exceptions_today;
+            const statusData = data && data.data ? data.data : null;
+            if (!statusData) {
+                document.getElementById('appsMonitored').textContent = '-';
+                document.getElementById('appsToday').textContent = '-';
+                document.getElementById('exceptionsToday').textContent = '-';
+                return;
+            }
+
+            document.getElementById('currentDate').textContent = statusData.current_date || '-';
+            document.getElementById('appsMonitored').textContent = statusData.apps_monitored ?? '-';
+            document.getElementById('appsToday').textContent = statusData.total_apps_today ?? '-';
+            document.getElementById('exceptionsToday').textContent = statusData.exceptions_today ?? '-';
         }
 
         // LIMITS MANAGEMENT

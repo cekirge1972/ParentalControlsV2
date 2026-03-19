@@ -35,7 +35,7 @@ def create_session():
         total=1,  # Only 1 retry to keep latency low over network
         backoff_factor=0.1,
         status_forcelist=[429, 500, 502, 503, 504],
-        method_whitelist=["HEAD", "GET", "OPTIONS", "POST", "PUT", "DELETE"]
+        allowed_methods=["HEAD", "GET", "OPTIONS", "POST", "PUT", "DELETE"]
     )
     
     adapter = HTTPAdapter(
@@ -56,10 +56,11 @@ PRIMARY_API_SESSION = create_session()
 log.setLevel(logging.ERROR) """
 
 # Configuration
-PRIMARY_API_URL = 'http://serhan-hn85:5000/api'
+PRIMARY_API_URL = 'http://localhost:5000/api'
 QUEUE_DB = 'request_queue.db'
 SYNC_INTERVAL = 10  # seconds
-REQUEST_TIMEOUT = 5.0  # seconds (allows for inter-machine latency)
+REQUEST_TIMEOUT = 4.0  # seconds for data requests
+PROBE_TIMEOUT = 1.0    # seconds for fast liveness probes
 
 # Request queue for async syncing
 sync_queue = Queue()
@@ -68,7 +69,7 @@ sync_queue = Queue()
 _primary_status_cache = {
     'last_check': 0,
     'is_alive': False,
-    'cache_ttl': 3,  # Cache for 3 seconds
+    'cache_ttl': 15,  # Cache for 15 seconds
     'last_status': None  # Track last status for change detection
 }
 
@@ -235,7 +236,7 @@ def check_primary_alive():
     last_exception = None
     for url in probe_urls:
         try:
-            response = requests.get(url, timeout=REQUEST_TIMEOUT)
+            response = PRIMARY_API_SESSION.get(url, timeout=PROBE_TIMEOUT)
             # Consider alive if we get an HTTP 200
             if response.status_code == 200:
                 is_alive = True
@@ -272,13 +273,13 @@ def forward_to_primary(method: str, endpoint: str, data: Dict = None) -> tuple:
     
     try:
         if method == 'GET':
-            response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+            response = PRIMARY_API_SESSION.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
         elif method == 'POST':
-            response = requests.post(url, headers=headers, json=data, timeout=REQUEST_TIMEOUT)
+            response = PRIMARY_API_SESSION.post(url, headers=headers, json=data, timeout=REQUEST_TIMEOUT)
         elif method == 'PUT':
-            response = requests.put(url, headers=headers, json=data, timeout=REQUEST_TIMEOUT)
+            response = PRIMARY_API_SESSION.put(url, headers=headers, json=data, timeout=REQUEST_TIMEOUT)
         elif method == 'DELETE':
-            response = requests.delete(url, headers=headers, timeout=REQUEST_TIMEOUT)
+            response = PRIMARY_API_SESSION.delete(url, headers=headers, timeout=REQUEST_TIMEOUT)
         else:
             return False, {'status': 'error', 'message': 'Unsupported method'}, 400
         
@@ -324,22 +325,28 @@ def add_cors_headers(response):
 
 def proxy_request(method: str, endpoint: str, data: Dict = None, return_queued: bool = False):
     """Generic proxy request handler."""
-    primary_is_alive = check_primary_alive()
-    
-    if primary_is_alive:
-        # Primary is available, try to forward
-        success, response, status_code = forward_to_primary(method, endpoint, data)
-        
-        if success:
-            # Cache successful GET responses
-            if method == 'GET':
-                cache_endpoint_data(endpoint, response)
-            return jsonify(response), 200
-        
-        # Primary is reachable but returned an error (4xx/5xx) - propagate the error
-        # rather than queuing, since the primary explicitly rejected the request
-        if status_code is not None:
-            return jsonify(response), status_code
+    # Try the real request first to avoid an extra network roundtrip per call.
+    success, response, status_code = forward_to_primary(method, endpoint, data)
+
+    if success:
+        _primary_status_cache['last_check'] = time.time()
+        _primary_status_cache['is_alive'] = True
+
+        # Cache successful GET responses
+        if method == 'GET':
+            cache_endpoint_data(endpoint, response)
+        return jsonify(response), 200
+
+    # Primary is reachable but returned an error (4xx/5xx) - propagate the error
+    # rather than queuing, since the primary explicitly rejected the request.
+    if status_code is not None:
+        _primary_status_cache['last_check'] = time.time()
+        _primary_status_cache['is_alive'] = True
+        return jsonify(response), status_code
+
+    # Unreachable due to connection/timeout errors
+    _primary_status_cache['last_check'] = time.time()
+    _primary_status_cache['is_alive'] = False
     
     # Primary is unreachable (connection/timeout error) or marked offline
     if method != 'GET' and return_queued:
@@ -446,6 +453,10 @@ def update_usage(date, app_name):
     return proxy_request('PUT', f'/usage/{date}/{app_name}', request.get_json(), return_queued=True)
 
 # STATUS & CONFIG ENDPOINTS
+@app.route("/api/status", methods=["GET"])
+def get_status():
+    return proxy_request('GET', '/status')
+
 @app.route("/api/config", methods=["GET"])
 def get_config():
     return proxy_request('GET', '/config')
