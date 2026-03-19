@@ -2,7 +2,7 @@ import json
 import time
 import psutil
 from datetime import datetime
-from win10toast import ToastNotifier
+from win11toast import toast
 import threading
 import requests
 import os
@@ -105,8 +105,9 @@ def trigger_tag_event(tag_id):
     threading.Thread(target=send_request).start()
 
 
+
 def notify(limit,usage,name=None):
-    toaster = ToastNotifier()
+    """ toaster = ToastNotifier() """
     if limit - usage in USAGE_NOTIFIERS:
         if name == "OVERALL":
             whole_txt = "Kalan bilgisayar kullanım süresi"
@@ -117,15 +118,17 @@ def notify(limit,usage,name=None):
         if limit - usage < 60: txt = f"{limit-usage} saniye"
         elif (limit - usage) % 60 == 0: txt = f"{(limit-usage)//60} dakika"
         else:txt = f"{(limit - usage) // 60} dakika {(limit - usage) % 60} saniye"
-        toaster.show_toast(
+        toast(
             "HASSS Agent",
             f"{whole_txt} {txt}",
-            duration=7,
-            threaded=True
+            scenario="urgent"
         )
         print(f"Sent notification for {name} for remaining {txt}")
 
 def check_exception(name,default_limit,default_usage,today):
+    global USED_EXCEPTIONS
+    # Reload USED_EXCEPTIONS from file to ensure we have the latest state
+    USED_EXCEPTIONS = load_used_exceptions()
     exceptions = load_exceptions()
     if today in exceptions and name in exceptions.get(today, {}):
         entries = exceptions.get(today).get(name, [])
@@ -159,12 +162,11 @@ def check_exception(name,default_limit,default_usage,today):
                             t_txt = f"{t//60} dakika {t%60} saniye"
                         else:
                             t_txt = f"{t} saniye"
-                        toaster = ToastNotifier()
-                        toaster.show_toast(
+                        """ toaster = ToastNotifier() """
+                        toast(
                             "HASSS Agent",
                             f"{txt_name} {t_txt} eklendi.",
-                            duration=7,
-                            threaded=True,
+                            scenario="urgent"
                         )
                         print(f"Sent notification for {name} for exceptional time addition of {t}")
                     else:
@@ -174,12 +176,11 @@ def check_exception(name,default_limit,default_usage,today):
                             t_txt = f"{abs(t)//60} dakika {abs(t)%60} saniye"
                         else:
                             t_txt = f"{abs(t)} saniye"
-                        toaster = ToastNotifier()
-                        toaster.show_toast(
+                        """ toaster = ToastNotifier() """
+                        toast(
                             "HASSS Agent",
                             f"{txt_name} {t_txt} azaltıldı.",
-                            duration=7,
-                            threaded=True,
+                            scenario="urgent"
                         )
                         print(f"Sent notification for {name} for exceptional time substriction of {t}")
 
@@ -202,12 +203,11 @@ def check_exception(name,default_limit,default_usage,today):
                         t_txt = f"{t_int//60} dakika {t_int%60} saniye"
                     else:
                         t_txt = f"{t_int} saniye"
-                    toaster = ToastNotifier()
-                    toaster.show_toast(
+                    """ toaster = ToastNotifier() """
+                    toast(
                         "HASSS Agent",
                         f"{txt_name} süre {t_txt} yapıldı.",
-                        duration=7,
-                        threaded=True,
+                        scenario="urgent"
                     )
                     print(f"Sent notification for {name} for exceptional time set of {t_int}")
                     USED_EXCEPTIONS.append(exception_id)
