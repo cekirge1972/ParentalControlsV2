@@ -536,8 +536,13 @@ def get_dashboard_data():
             if succeeded:
                 any_primary_success = True
 
-    # Update the primary-alive cache based on actual fetch results
-    _update_primary_status(any_primary_success)
+    # Only update the primary-alive cache when primary was actually confirmed
+    # reachable.  If every fetch_one call returned from the offline cache
+    # (no real connection attempt was made), do NOT reset last_check — let the
+    # TTL expire naturally so check_primary_alive() will probe again on the
+    # next cycle instead of perpetually reporting "offline".
+    if any_primary_success:
+        _update_primary_status(True)
 
     results['server'] = {
         'primary_api': 'online' if any_primary_success else 'offline',
